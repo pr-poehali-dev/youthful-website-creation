@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -80,6 +80,35 @@ const [userData, setUserData] = useState({
   ];
 
 const visualPacks = features;
+
+  useEffect(() => {
+    const saved = localStorage.getItem('rockstarData');
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.isLoggedIn) setIsLoggedIn(data.isLoggedIn);
+        if (data.userData) setUserData(data.userData);
+        if (data.users) setUsers(data.users);
+        if (data.features) setFeatures(data.features);
+        if (data.promocodes) setPromocodes(data.promocodes);
+        if (data.activationKeys) setActivationKeys(data.activationKeys);
+      } catch (e) {
+        console.error('Ошибка загрузки данных', e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const dataToSave = {
+      isLoggedIn,
+      userData,
+      users,
+      features,
+      promocodes,
+      activationKeys
+    };
+    localStorage.setItem('rockstarData', JSON.stringify(dataToSave));
+  }, [isLoggedIn, userData, users, features, promocodes, activationKeys]);
 
 const handleLogin = () => {
     setLoginError('');
