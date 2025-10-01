@@ -9,17 +9,22 @@ import Icon from '@/components/ui/icon';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
-  const [isAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoError, setPromoError] = useState('');
+  
   const [userData, setUserData] = useState({
-    uid: 'RST-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-    nickname: 'Player',
-    email: 'player@rockstar.com',
+    uid: 1,
+    nickname: 'Guest',
+    email: 'guest@rockstar.com',
     hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
-    subscription: 'Навсегда',
-    subscriptionEnd: '2025-12-31'
+    subscription: 'Нет подписки',
+    subscriptionEnd: null,
+    isAdmin: false
   });
 
   const subscriptionPlans = [
@@ -59,7 +64,17 @@ const Index = () => {
     }
   ];
 
-  const handleLogin = () => {
+const handleLogin = () => {
+    const isAdminLogin = userData.uid === 1;
+    setUserData({
+      uid: userData.uid,
+      nickname: isAdminLogin ? 'wezxe' : 'Player' + userData.uid,
+      email: isAdminLogin ? 'wezxe@rockstar.com' : `player${userData.uid}@rockstar.com`,
+      hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
+      subscription: isAdminLogin ? 'Навсегда' : 'Нет подписки',
+      subscriptionEnd: isAdminLogin ? '2099-12-31' : null,
+      isAdmin: isAdminLogin
+    });
     setIsLoggedIn(true);
     setShowAuthModal(false);
     setActiveTab('profile');
@@ -67,7 +82,46 @@ const Index = () => {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setUserData({
+      uid: userData.uid + 1,
+      nickname: 'Guest',
+      email: 'guest@rockstar.com',
+      hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
+      subscription: 'Нет подписки',
+      subscriptionEnd: null,
+      isAdmin: false
+    });
     setActiveTab('home');
+  };
+
+  const handlePurchase = (planId: number) => {
+    setSelectedPlan(planId);
+    setActiveTab('checkout');
+  };
+
+  const applyPromoCode = () => {
+    setPromoError('');
+    setPromoDiscount(0);
+    
+    const validPromoCodes: {[key: string]: number} = {
+      'ROCKSTAR50': 50,
+      'PREMIUM25': 25,
+      'WEZXE100': 100
+    };
+    
+    const discount = validPromoCodes[promoCode.toUpperCase()];
+    
+    if (discount) {
+      setPromoDiscount(discount);
+    } else {
+      setPromoError('Неверный промокод');
+    }
+  };
+
+  const calculateFinalPrice = (price: string) => {
+    const numPrice = parseInt(price.replace(/[^0-9]/g, ''));
+    const discount = (numPrice * promoDiscount) / 100;
+    return numPrice - discount;
   };
 
   return (
@@ -111,7 +165,7 @@ const Index = () => {
                   Профиль
                 </button>
               )}
-              {isAdmin && (
+{userData.isAdmin && isLoggedIn && (
                 <button 
                   onClick={() => setActiveTab('admin')}
                   className={`text-sm font-medium transition-colors ${activeTab === 'admin' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`}
@@ -300,7 +354,8 @@ const Index = () => {
                         <span className="text-sm text-gray-300">Поддержка 24/7</span>
                       </li>
                     </ul>
-                    <Button 
+<Button 
+                      onClick={() => handlePurchase(plan.id)}
                       className={`w-full ${
                         index === 1 
                           ? 'bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold' 
@@ -401,6 +456,124 @@ const Index = () => {
           </div>
         )}
 
+        {activeTab === 'checkout' && selectedPlan && (
+          <div className="space-y-8 animate-scale-in max-w-2xl mx-auto">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                onClick={() => setActiveTab('pricing')}
+                className="text-gray-400 hover:text-green-400"
+              >
+                <Icon name="ArrowLeft" size={20} className="mr-2" />
+                Назад
+              </Button>
+            </div>
+
+            <Card className="p-8 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent mb-6">
+                Оформление подписки
+              </h2>
+
+              {(() => {
+                const plan = subscriptionPlans.find(p => p.id === selectedPlan);
+                if (!plan) return null;
+                
+                const originalPrice = parseInt(plan.price.replace(/[^0-9]/g, ''));
+                const finalPrice = calculateFinalPrice(plan.price);
+
+                return (
+                  <div className="space-y-6">
+                    <div className="p-6 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
+                          <p className="text-gray-400">{plan.duration} доступа</p>
+                        </div>
+                        <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">
+                          {plan.badge}
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex items-baseline gap-3">
+                        {promoDiscount > 0 && (
+                          <span className="text-2xl text-gray-500 line-through">{originalPrice}₽</span>
+                        )}
+                        <span className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
+                          {finalPrice}₽
+                        </span>
+                        {promoDiscount > 0 && (
+                          <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                            -{promoDiscount}%
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-bold text-white">Промокод</h3>
+                      <div className="flex gap-3">
+                        <Input
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                          placeholder="Введи промокод"
+                          className="bg-gray-800/50 border-green-500/30 text-white placeholder:text-gray-500"
+                        />
+                        <Button
+                          onClick={applyPromoCode}
+                          variant="outline"
+                          className="border-green-500/50 text-green-400 hover:bg-green-500/10"
+                        >
+                          Применить
+                        </Button>
+                      </div>
+                      {promoError && (
+                        <p className="text-red-400 text-sm">{promoError}</p>
+                      )}
+                      {promoDiscount > 0 && (
+                        <p className="text-green-400 text-sm">✅ Промокод применён! Скидка {promoDiscount}%</p>
+                      )}
+                      
+                      <div className="mt-4 p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                        <p className="text-sm text-cyan-300 font-semibold mb-2">💡 Доступные промокоды:</p>
+                        <ul className="text-xs text-gray-400 space-y-1">
+                          <li><code className="text-green-400">ROCKSTAR50</code> - скидка 50%</li>
+                          <li><code className="text-green-400">PREMIUM25</code> - скидка 25%</li>
+                          <li><code className="text-green-400">WEZXE100</code> - скидка 100% (для wezxe)</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-bold text-white">Способ оплаты</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Button variant="outline" className="border-green-500/30 text-white hover:bg-green-500/10 h-16">
+                          <Icon name="CreditCard" size={20} className="mr-2" />
+                          Карта
+                        </Button>
+                        <Button variant="outline" className="border-green-500/30 text-white hover:bg-green-500/10 h-16">
+                          <Icon name="Wallet" size={20} className="mr-2" />
+                          Qiwi
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Button 
+                      className="w-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold h-14 text-lg"
+                    >
+                      <Icon name="Lock" size={20} className="mr-2" />
+                      Оплатить {finalPrice}₽
+                    </Button>
+
+                    <p className="text-xs text-gray-500 text-center">
+                      Нажимая кнопку оплаты, вы соглашаетесь с условиями использования
+                    </p>
+                  </div>
+                );
+              })()}
+            </Card>
+          </div>
+        )}
+
 {activeTab === 'admin' && (
           <div className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-3">
@@ -410,28 +583,69 @@ const Index = () => {
               <h2 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Админ-панель</h2>
             </div>
 
-            <Tabs defaultValue="users" className="space-y-6">
+<Tabs defaultValue="users" className="space-y-6">
               <TabsList className="bg-gray-900 border border-green-500/30">
                 <TabsTrigger value="users" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Пользователи</TabsTrigger>
                 <TabsTrigger value="subscriptions" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Подписки</TabsTrigger>
+                <TabsTrigger value="promocodes" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Промокоды</TabsTrigger>
                 <TabsTrigger value="visuals" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Функции</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="users" className="space-y-4">
+<TabsContent value="users" className="space-y-4">
                 <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
-                  <h3 className="text-xl font-bold text-white mb-4">Управление пользователями</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white">Управление пользователями</h3>
+                    <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                      Всего: 156 пользователей
+                    </Badge>
+                  </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-4 bg-green-500/10 rounded-lg border border-green-500/20">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30">
-                          <Icon name="User" size={20} className="text-green-400" />
+                          <Icon name="Crown" size={20} className="text-green-400" />
                         </div>
                         <div>
-                          <p className="font-semibold text-white">admin@rockstar.com</p>
-                          <p className="text-sm text-gray-400">Администратор</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-white">wezxe</p>
+                            <Badge className="bg-green-500/20 text-green-400 border border-green-500/30 text-xs">UID: 1</Badge>
+                          </div>
+                          <p className="text-sm text-gray-400">wezxe@rockstar.com</p>
                         </div>
                       </div>
-                      <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">Admin</Badge>
+                      <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">Владелец</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30">
+                          <Icon name="User" size={20} className="text-cyan-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-white">Player2</p>
+                            <Badge className="bg-gray-700 text-gray-300 text-xs">UID: 2</Badge>
+                          </div>
+                          <p className="text-sm text-gray-400">player2@rockstar.com</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Premium</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30">
+                          <Icon name="User" size={20} className="text-cyan-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-white">Player3</p>
+                            <Badge className="bg-gray-700 text-gray-300 text-xs">UID: 3</Badge>
+                          </div>
+                          <p className="text-sm text-gray-400">player3@rockstar.com</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="border-gray-600 text-gray-400">Бесплатно</Badge>
                     </div>
                   </div>
                 </Card>
@@ -461,6 +675,74 @@ const Index = () => {
                         </div>
                       </Card>
                     ))}
+                  </div>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="promocodes" className="space-y-4">
+                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white">Управление промокодами</h3>
+                    <Button className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold">
+                      <Icon name="Plus" size={18} className="mr-2" />
+                      Создать промокод
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
+                          <Icon name="Ticket" size={24} className="text-green-400" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-lg">ROCKSTAR50</p>
+                          <p className="text-sm text-gray-400">Скидка 50% • Использовано: 23/100</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">Активен</Badge>
+                        <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
+                          <Icon name="Trash2" size={16} />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center border border-cyan-500/30">
+                          <Icon name="Ticket" size={24} className="text-cyan-400" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-lg">PREMIUM25</p>
+                          <p className="text-sm text-gray-400">Скидка 25% • Использовано: 87/500</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Активен</Badge>
+                        <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
+                          <Icon name="Trash2" size={16} />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center border border-yellow-500/30">
+                          <Icon name="Crown" size={24} className="text-yellow-400" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-lg">WEZXE100</p>
+                          <p className="text-sm text-gray-400">Скидка 100% • Использовано: 1/10</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">VIP</Badge>
+                        <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
+                          <Icon name="Trash2" size={16} />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </Card>
               </TabsContent>
