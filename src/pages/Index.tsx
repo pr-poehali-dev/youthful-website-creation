@@ -17,15 +17,52 @@ const Index = () => {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoError, setPromoError] = useState('');
   
-  const [userData, setUserData] = useState({
+const [userData, setUserData] = useState({
     uid: 1,
     nickname: 'Guest',
     email: 'guest@rockstar.com',
     hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
     subscription: 'Нет подписки',
     subscriptionEnd: null,
-    isAdmin: false
+    isAdmin: false,
+    role: 'Пользователь'
   });
+
+  const [features, setFeatures] = useState([
+    { id: 1, title: 'Rockstar Premium', description: 'Полный набор функций для доминирования', image: 'https://images.unsplash.com/photo-1614854262318-831574f15f1f?w=400&h=300&fit=crop', premium: true },
+    { id: 2, title: 'Rockstar Combat', description: 'Расширенные боевые возможности', image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop', premium: true },
+    { id: 3, title: 'Rockstar ESP', description: 'Визуализация игроков и предметов', image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop', premium: false },
+    { id: 4, title: 'Rockstar Aimbot', description: 'Точность на максимум', image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop', premium: true }
+  ]);
+
+  const [promocodes, setPromocodes] = useState([
+    { id: 1, code: 'ROCKSTAR50', discount: 50, uses: 23, maxUses: 100, active: true },
+    { id: 2, code: 'PREMIUM25', discount: 25, uses: 87, maxUses: 500, active: true },
+    { id: 3, code: 'WEZXE100', discount: 100, uses: 1, maxUses: 10, active: true }
+  ]);
+
+  const [activationKeys, setActivationKeys] = useState([
+    { id: 1, key: 'RST-7D-A1B2C3D4E5', duration: 7, plan: '7 дней', used: false, createdAt: '2024-01-15' },
+    { id: 2, key: 'RST-30D-F6G7H8I9J0', duration: 30, plan: '30 дней', used: false, createdAt: '2024-01-15' },
+    { id: 3, key: 'RST-LIFE-K1L2M3N4O5', duration: 999999, plan: 'Навсегда', used: false, createdAt: '2024-01-15' },
+    { id: 4, key: 'RST-7D-P6Q7R8S9T0', duration: 7, plan: '7 дней', used: true, createdAt: '2024-01-14' }
+  ]);
+
+  const [users, setUsers] = useState([
+    { id: 1, nickname: 'wezxe', email: 'wezxe@rockstar.com', role: 'Администратор', subscription: 'Навсегда' },
+    { id: 2, nickname: 'Player2', email: 'player2@rockstar.com', role: 'Пользователь', subscription: 'Premium' },
+    { id: 3, nickname: 'Player3', email: 'player3@rockstar.com', role: 'Тестер', subscription: 'Бесплатно' },
+    { id: 4, nickname: 'YouTuber1', email: 'youtuber@rockstar.com', role: 'Ютубер', subscription: 'Навсегда' }
+  ]);
+
+  const [showAddFeature, setShowAddFeature] = useState(false);
+  const [showAddPromo, setShowAddPromo] = useState(false);
+  const [showGenerateKey, setShowGenerateKey] = useState(false);
+  const [showEditRole, setShowEditRole] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [newFeature, setNewFeature] = useState({ title: '', description: '', premium: false });
+  const [newPromo, setNewPromo] = useState({ code: '', discount: 0, maxUses: 0 });
+  const [keyDuration, setKeyDuration] = useState<7 | 30 | 999999>(7);
 
   const subscriptionPlans = [
     { id: 1, name: '7 дней', price: '199₽', duration: '7 дней', badge: 'Пробный' },
@@ -33,36 +70,7 @@ const Index = () => {
     { id: 3, name: 'Навсегда', price: '1999₽', duration: 'Навсегда', badge: 'Premium' }
   ];
 
-  const visualPacks = [
-    {
-      id: 1,
-      title: 'Rockstar Premium',
-      description: 'Полный набор функций для доминирования',
-      image: 'https://images.unsplash.com/photo-1614854262318-831574f15f1f?w=400&h=300&fit=crop',
-      premium: true
-    },
-    {
-      id: 2,
-      title: 'Rockstar Combat',
-      description: 'Расширенные боевые возможности',
-      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop',
-      premium: true
-    },
-    {
-      id: 3,
-      title: 'Rockstar ESP',
-      description: 'Визуализация игроков и предметов',
-      image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop',
-      premium: false
-    },
-    {
-      id: 4,
-      title: 'Rockstar Aimbot',
-      description: 'Точность на максимум',
-      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop',
-      premium: true
-    }
-  ];
+const visualPacks = features;
 
 const handleLogin = () => {
     const isAdminLogin = userData.uid === 1;
@@ -73,14 +81,70 @@ const handleLogin = () => {
       hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
       subscription: isAdminLogin ? 'Навсегда' : 'Нет подписки',
       subscriptionEnd: isAdminLogin ? '2099-12-31' : null,
-      isAdmin: isAdminLogin
+      isAdmin: isAdminLogin,
+      role: isAdminLogin ? 'Администратор' : 'Пользователь'
     });
     setIsLoggedIn(true);
     setShowAuthModal(false);
     setActiveTab('profile');
   };
 
-  const handleLogout = () => {
+  const generateKey = (duration: 7 | 30 | 999999) => {
+    const planNames = { 7: '7 дней', 30: '30 дней', 999999: 'Навсегда' };
+    const prefix = duration === 7 ? '7D' : duration === 30 ? '30D' : 'LIFE';
+    const randomPart = Math.random().toString(36).substr(2, 10).toUpperCase();
+    const newKey = {
+      id: activationKeys.length + 1,
+      key: `RST-${prefix}-${randomPart}`,
+      duration: duration,
+      plan: planNames[duration],
+      used: false,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    setActivationKeys([...activationKeys, newKey]);
+    return newKey.key;
+  };
+
+  const deleteFeature = (id: number) => {
+    setFeatures(features.filter(f => f.id !== id));
+  };
+
+  const addFeature = () => {
+    if (!newFeature.title || !newFeature.description) return;
+    const feature = {
+      id: features.length + 1,
+      ...newFeature,
+      image: 'https://images.unsplash.com/photo-1614854262318-831574f15f1f?w=400&h=300&fit=crop'
+    };
+    setFeatures([...features, feature]);
+    setNewFeature({ title: '', description: '', premium: false });
+    setShowAddFeature(false);
+  };
+
+  const deletePromo = (id: number) => {
+    setPromocodes(promocodes.filter(p => p.id !== id));
+  };
+
+  const addPromo = () => {
+    if (!newPromo.code || newPromo.discount <= 0) return;
+    const promo = {
+      id: promocodes.length + 1,
+      ...newPromo,
+      uses: 0,
+      active: true
+    };
+    setPromocodes([...promocodes, promo]);
+    setNewPromo({ code: '', discount: 0, maxUses: 0 });
+    setShowAddPromo(false);
+  };
+
+  const updateUserRole = (userId: number, newRole: string) => {
+    setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    setShowEditRole(false);
+    setSelectedUser(null);
+  };
+
+const handleLogout = () => {
     setIsLoggedIn(false);
     setUserData({
       uid: userData.uid + 1,
@@ -89,7 +153,8 @@ const handleLogin = () => {
       hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
       subscription: 'Нет подписки',
       subscriptionEnd: null,
-      isAdmin: false
+      isAdmin: false,
+      role: 'Пользователь'
     });
     setActiveTab('home');
   };
@@ -584,9 +649,9 @@ const handleLogin = () => {
             </div>
 
 <Tabs defaultValue="users" className="space-y-6">
-              <TabsList className="bg-gray-900 border border-green-500/30">
+<TabsList className="bg-gray-900 border border-green-500/30">
                 <TabsTrigger value="users" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Пользователи</TabsTrigger>
-                <TabsTrigger value="subscriptions" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Подписки</TabsTrigger>
+                <TabsTrigger value="keys" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Ключи</TabsTrigger>
                 <TabsTrigger value="promocodes" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Промокоды</TabsTrigger>
                 <TabsTrigger value="visuals" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Функции</TabsTrigger>
               </TabsList>
@@ -596,57 +661,101 @@ const handleLogin = () => {
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-white">Управление пользователями</h3>
                     <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                      Всего: 156 пользователей
+                      Всего: {users.length} пользователей
                     </Badge>
                   </div>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30">
-                          <Icon name="Crown" size={20} className="text-green-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-white">wezxe</p>
-                            <Badge className="bg-green-500/20 text-green-400 border border-green-500/30 text-xs">UID: 1</Badge>
+                    {users.map((user, index) => {
+                      const roleColors = {
+                        'Администратор': 'green',
+                        'Тестер': 'yellow',
+                        'Ютубер': 'purple',
+                        'Пользователь': 'gray'
+                      };
+                      const color = roleColors[user.role as keyof typeof roleColors] || 'gray';
+                      
+                      return (
+                        <div key={user.id} className={`flex items-center justify-between p-4 rounded-lg border ${
+                          index === 0 ? 'bg-green-500/10 border-green-500/20' : 'bg-gray-800/50 border-gray-700'
+                        }`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 bg-${color}-500/20 rounded-full flex items-center justify-center border border-${color}-500/30`}>
+                              <Icon name={index === 0 ? "Crown" : "User"} size={20} className={`text-${color}-400`} />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-white">{user.nickname}</p>
+                                <Badge className="bg-gray-700 text-gray-300 text-xs">UID: {user.id}</Badge>
+                              </div>
+                              <p className="text-sm text-gray-400">{user.email}</p>
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-400">wezxe@rockstar.com</p>
+                          <div className="flex gap-2">
+                            <Badge className={`bg-${color}-500/20 text-${color}-400 border border-${color}-500/30`}>
+                              {user.role}
+                            </Badge>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => { setSelectedUser(user); setShowEditRole(true); }}
+                              className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10"
+                            >
+                              <Icon name="Edit" size={16} />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                      <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">Владелец</Badge>
-                    </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              </TabsContent>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30">
-                          <Icon name="User" size={20} className="text-cyan-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-white">Player2</p>
-                            <Badge className="bg-gray-700 text-gray-300 text-xs">UID: 2</Badge>
+              <TabsContent value="keys" className="space-y-4">
+                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white">Ключи активации</h3>
+                    <Button 
+                      onClick={() => setShowGenerateKey(true)}
+                      className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+                    >
+                      <Icon name="Key" size={18} className="mr-2" />
+                      Генерировать ключ
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {activationKeys.map(key => (
+                      <div key={key.id} className={`flex items-center justify-between p-4 rounded-lg border ${
+                        key.used ? 'bg-gray-800/30 border-gray-700' : 'bg-green-500/10 border-green-500/20'
+                      }`}>
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center border ${
+                            key.used ? 'bg-gray-700 border-gray-600' : 'bg-green-500/20 border-green-500/30'
+                          }`}>
+                            <Icon name="Key" size={24} className={key.used ? 'text-gray-400' : 'text-green-400'} />
                           </div>
-                          <p className="text-sm text-gray-400">player2@rockstar.com</p>
+                          <div>
+                            <p className="font-mono font-bold text-white">{key.key}</p>
+                            <p className="text-sm text-gray-400">{key.plan} • Создан: {key.createdAt}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          {key.used ? (
+                            <Badge variant="outline" className="border-gray-600 text-gray-400">Использован</Badge>
+                          ) : (
+                            <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">Активен</Badge>
+                          )}
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigator.clipboard.writeText(key.key)}
+                            className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10"
+                          >
+                            <Icon name="Copy" size={16} />
+                          </Button>
                         </div>
                       </div>
-                      <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Premium</Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30">
-                          <Icon name="User" size={20} className="text-cyan-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-white">Player3</p>
-                            <Badge className="bg-gray-700 text-gray-300 text-xs">UID: 3</Badge>
-                          </div>
-                          <p className="text-sm text-gray-400">player3@rockstar.com</p>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="border-gray-600 text-gray-400">Бесплатно</Badge>
-                    </div>
+                    ))}
                   </div>
                 </Card>
               </TabsContent>
@@ -679,99 +788,92 @@ const handleLogin = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="promocodes" className="space-y-4">
+<TabsContent value="promocodes" className="space-y-4">
                 <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-white">Управление промокодами</h3>
-                    <Button className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold">
+                    <Button 
+                      onClick={() => setShowAddPromo(true)}
+                      className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+                    >
                       <Icon name="Plus" size={18} className="mr-2" />
                       Создать промокод
                     </Button>
                   </div>
                   
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
-                          <Icon name="Ticket" size={24} className="text-green-400" />
+                    {promocodes.map((promo, index) => {
+                      const colors = ['green', 'cyan', 'yellow'];
+                      const color = colors[index % colors.length];
+                      
+                      return (
+                        <div key={promo.id} className={`flex items-center justify-between p-4 bg-${color}-500/10 rounded-lg border border-${color}-500/20`}>
+                          <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 bg-${color}-500/20 rounded-lg flex items-center justify-center border border-${color}-500/30`}>
+                              <Icon name={promo.discount === 100 ? "Crown" : "Ticket"} size={24} className={`text-${color}-400`} />
+                            </div>
+                            <div>
+                              <p className="font-bold text-white text-lg">{promo.code}</p>
+                              <p className="text-sm text-gray-400">Скидка {promo.discount}% • Использовано: {promo.uses}/{promo.maxUses}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Badge className={`bg-${color}-500/20 text-${color}-400 border border-${color}-500/30`}>
+                              {promo.discount === 100 ? 'VIP' : 'Активен'}
+                            </Badge>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => deletePromo(promo.id)}
+                              className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                            >
+                              <Icon name="Trash2" size={16} />
+                            </Button>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-white text-lg">ROCKSTAR50</p>
-                          <p className="text-sm text-gray-400">Скидка 50% • Использовано: 23/100</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">Активен</Badge>
-                        <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
-                          <Icon name="Trash2" size={16} />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center border border-cyan-500/30">
-                          <Icon name="Ticket" size={24} className="text-cyan-400" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-white text-lg">PREMIUM25</p>
-                          <p className="text-sm text-gray-400">Скидка 25% • Использовано: 87/500</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Активен</Badge>
-                        <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
-                          <Icon name="Trash2" size={16} />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center border border-yellow-500/30">
-                          <Icon name="Crown" size={24} className="text-yellow-400" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-white text-lg">WEZXE100</p>
-                          <p className="text-sm text-gray-400">Скидка 100% • Использовано: 1/10</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">VIP</Badge>
-                        <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
-                          <Icon name="Trash2" size={16} />
-                        </Button>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
                 </Card>
               </TabsContent>
 
-              <TabsContent value="visuals" className="space-y-4">
+<TabsContent value="visuals" className="space-y-4">
                 <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-white">Управление функциями</h3>
-                    <Button className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold">
+                    <Button 
+                      onClick={() => setShowAddFeature(true)}
+                      className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+                    >
                       <Icon name="Upload" size={18} className="mr-2" />
                       Добавить функцию
                     </Button>
                   </div>
                   
                   <div className="space-y-3">
-                    {visualPacks.map(pack => (
+                    {features.map(pack => (
                       <div key={pack.id} className="flex items-center justify-between p-4 bg-green-500/10 rounded-lg border border-green-500/20">
                         <div className="flex items-center gap-4">
                           <img src={pack.image} alt={pack.title} className="w-16 h-16 rounded-lg object-cover opacity-60" />
                           <div>
-                            <p className="font-semibold text-white">{pack.title}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-white">{pack.title}</p>
+                              {pack.premium && (
+                                <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-xs">
+                                  Premium
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-sm text-gray-400">{pack.description}</p>
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="border-green-500/50 text-green-400 hover:bg-green-500/10">
-                            <Icon name="Edit" size={16} />
-                          </Button>
-                          <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => deleteFeature(pack.id)}
+                            className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                          >
                             <Icon name="Trash2" size={16} />
                           </Button>
                         </div>
@@ -784,6 +886,191 @@ const handleLogin = () => {
           </div>
         )}
       </main>
+
+      {showGenerateKey && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <Card className="w-full max-w-md mx-4 p-8 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
+                Генерация ключа
+              </h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowGenerateKey(false)} className="text-gray-400">
+                <Icon name="X" size={20} />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-white mb-2">Выберите план</Label>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {[
+                    { duration: 7 as 7 | 30 | 999999, label: '7 дней' },
+                    { duration: 30 as 7 | 30 | 999999, label: '30 дней' },
+                    { duration: 999999 as 7 | 30 | 999999, label: 'Навсегда' }
+                  ].map(plan => (
+                    <Button
+                      key={plan.duration}
+                      variant={keyDuration === plan.duration ? 'default' : 'outline'}
+                      onClick={() => setKeyDuration(plan.duration)}
+                      className={keyDuration === plan.duration 
+                        ? 'bg-gradient-to-r from-cyan-500 to-green-500 text-black' 
+                        : 'border-green-500/50 text-green-400'}
+                    >
+                      {plan.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <Button
+                onClick={() => {
+                  const key = generateKey(keyDuration);
+                  navigator.clipboard.writeText(key);
+                  setShowGenerateKey(false);
+                }}
+                className="w-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+              >
+                <Icon name="Key" size={18} className="mr-2" />
+                Сгенерировать ключ
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {showAddFeature && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <Card className="w-full max-w-md mx-4 p-8 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
+                Добавить функцию
+              </h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowAddFeature(false)} className="text-gray-400">
+                <Icon name="X" size={20} />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-white">Название</Label>
+                <Input
+                  value={newFeature.title}
+                  onChange={(e) => setNewFeature({...newFeature, title: e.target.value})}
+                  className="bg-gray-800/50 border-green-500/30 text-white mt-2"
+                  placeholder="Rockstar Ultimate"
+                />
+              </div>
+              <div>
+                <Label className="text-white">Описание</Label>
+                <Input
+                  value={newFeature.description}
+                  onChange={(e) => setNewFeature({...newFeature, description: e.target.value})}
+                  className="bg-gray-800/50 border-green-500/30 text-white mt-2"
+                  placeholder="Описание функции"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={newFeature.premium}
+                  onChange={(e) => setNewFeature({...newFeature, premium: e.target.checked})}
+                  className="w-4 h-4"
+                />
+                <Label className="text-white">Premium функция</Label>
+              </div>
+              <Button
+                onClick={addFeature}
+                className="w-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+              >
+                Добавить
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {showAddPromo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <Card className="w-full max-w-md mx-4 p-8 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
+                Создать промокод
+              </h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowAddPromo(false)} className="text-gray-400">
+                <Icon name="X" size={20} />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-white">Код</Label>
+                <Input
+                  value={newPromo.code}
+                  onChange={(e) => setNewPromo({...newPromo, code: e.target.value.toUpperCase()})}
+                  className="bg-gray-800/50 border-green-500/30 text-white mt-2"
+                  placeholder="PROMO2024"
+                />
+              </div>
+              <div>
+                <Label className="text-white">Скидка (%)</Label>
+                <Input
+                  type="number"
+                  value={newPromo.discount || ''}
+                  onChange={(e) => setNewPromo({...newPromo, discount: parseInt(e.target.value) || 0})}
+                  className="bg-gray-800/50 border-green-500/30 text-white mt-2"
+                  placeholder="50"
+                />
+              </div>
+              <div>
+                <Label className="text-white">Макс. использований</Label>
+                <Input
+                  type="number"
+                  value={newPromo.maxUses || ''}
+                  onChange={(e) => setNewPromo({...newPromo, maxUses: parseInt(e.target.value) || 0})}
+                  className="bg-gray-800/50 border-green-500/30 text-white mt-2"
+                  placeholder="100"
+                />
+              </div>
+              <Button
+                onClick={addPromo}
+                className="w-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+              >
+                Создать
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {showEditRole && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <Card className="w-full max-w-md mx-4 p-8 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
+                Изменить роль
+              </h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowEditRole(false)} className="text-gray-400">
+                <Icon name="X" size={20} />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-white">Пользователь: {selectedUser.nickname}</Label>
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  {['Администратор', 'Тестер', 'Ютубер', 'Пользователь'].map(role => (
+                    <Button
+                      key={role}
+                      variant={selectedUser.role === role ? 'default' : 'outline'}
+                      onClick={() => updateUserRole(selectedUser.id, role)}
+                      className={selectedUser.role === role
+                        ? 'bg-gradient-to-r from-cyan-500 to-green-500 text-black'
+                        : 'border-green-500/50 text-green-400'}
+                    >
+                      {role}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
