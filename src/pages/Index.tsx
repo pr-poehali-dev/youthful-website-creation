@@ -357,9 +357,9 @@ const handleLogout = () => {
                   </Button>
                   <Button 
                     onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}
-                    className="relative bg-gradient-to-r from-cyan-500 via-green-500 to-cyan-600 hover:from-cyan-600 hover:via-green-600 hover:to-cyan-700 text-black font-bold shadow-lg shadow-cyan-500/50 hover:shadow-xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 animate-shimmer"
+                    className="relative bg-gradient-to-r from-cyan-500 to-green-500 text-black font-bold shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 animate-shimmer overflow-hidden"
                   >
-                    <span className="relative z-10">Регистрация</span>
+                    Регистрация
                   </Button>
                 </>
               ) : (
@@ -462,9 +462,9 @@ const handleLogout = () => {
                   <div className="p-6 space-y-3">
                     <h3 className="text-xl font-bold text-white">{pack.title}</h3>
                     <p className="text-gray-400">{pack.description}</p>
-                    <Button className="w-full bg-gradient-to-r from-cyan-500 via-green-500 to-cyan-600 hover:from-cyan-600 hover:via-green-600 hover:to-cyan-700 text-black font-bold shadow-lg shadow-cyan-500/50 hover:shadow-xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 animate-shimmer">
+                    <Button className="w-full bg-gradient-to-r from-cyan-500 to-green-500 text-black font-bold shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 animate-shimmer overflow-hidden">
                       <Icon name="Download" size={18} className="mr-2" />
-                      <span className="relative z-10">Скачать</span>
+                      Скачать
                     </Button>
                   </div>
                 </Card>
@@ -526,13 +526,13 @@ const handleLogout = () => {
                     </ul>
 <Button 
                       onClick={() => handlePurchase(plan.id)}
-                      className={`w-full transition-all duration-300 hover:scale-105 ${
+                      className={`w-full transition-all duration-300 hover:scale-105 overflow-hidden ${
                         index === 1 
-                          ? 'bg-gradient-to-r from-cyan-500 via-green-500 to-cyan-600 hover:from-cyan-600 hover:via-green-600 hover:to-cyan-700 text-black font-bold shadow-lg shadow-cyan-500/50 hover:shadow-xl hover:shadow-green-500/50 animate-shimmer' 
-                          : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/50'
+                          ? 'bg-gradient-to-r from-cyan-500 to-green-500 text-black font-bold shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-green-500/50 animate-shimmer' 
+                          : 'bg-gradient-to-r from-cyan-600 to-green-600 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/50'
                       }`}
                     >
-                      <span className="relative z-10">Оформить подписку</span>
+                      Оформить подписку
                     </Button>
                   </div>
                 </Card>
@@ -627,10 +627,10 @@ const handleLogout = () => {
                     />
                     <Button
                       onClick={activateKey}
-                      className="bg-gradient-to-r from-cyan-500 via-green-500 to-cyan-600 hover:from-cyan-600 hover:via-green-600 hover:to-cyan-700 text-black font-bold shadow-lg shadow-cyan-500/50 hover:shadow-xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 animate-shimmer"
+                      className="bg-gradient-to-r from-cyan-500 to-green-500 text-black font-bold shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 animate-shimmer overflow-hidden"
                     >
                       <Icon name="Check" size={18} className="mr-2" />
-                      <span className="relative z-10">Активировать</span>
+                      Активировать
                     </Button>
                   </div>
                   {activationError && (
@@ -653,9 +653,9 @@ const handleLogout = () => {
                   <h3 className="text-lg font-bold text-white mb-2">Скачать клиент</h3>
                   <p className="text-gray-400 text-sm">Последняя версия Rockstar Client v2.5.1</p>
                 </div>
-                <Button className="bg-gradient-to-r from-cyan-500 via-green-500 to-cyan-600 hover:from-cyan-600 hover:via-green-600 hover:to-cyan-700 text-black font-bold shadow-lg shadow-cyan-500/50 hover:shadow-xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 animate-shimmer">
+                <Button className="bg-gradient-to-r from-cyan-500 to-green-500 text-black font-bold shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 animate-shimmer overflow-hidden">
                   <Icon name="Download" size={18} className="mr-2" />
-                  <span className="relative z-10">Скачать</span>
+                  Скачать
                 </Button>
               </div>
             </Card>
