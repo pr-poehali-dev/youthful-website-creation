@@ -49,10 +49,10 @@ const [userData, setUserData] = useState({
   ]);
 
   const [users, setUsers] = useState([
-    { id: 1, nickname: 'wezxe', email: 'wezxe@rockstar.com', role: 'Администратор', subscription: 'Навсегда' },
-    { id: 2, nickname: 'Player2', email: 'player2@rockstar.com', role: 'Пользователь', subscription: 'Premium' },
-    { id: 3, nickname: 'Player3', email: 'player3@rockstar.com', role: 'Тестер', subscription: 'Бесплатно' },
-    { id: 4, nickname: 'YouTuber1', email: 'youtuber@rockstar.com', role: 'Ютубер', subscription: 'Навсегда' }
+    { id: 1, nickname: 'wezxe', email: 'wezxe@rockstar.com', password: '1234', role: 'Администратор', subscription: 'Навсегда' },
+    { id: 2, nickname: 'Player2', email: 'player2@rockstar.com', password: 'pass123', role: 'Пользователь', subscription: 'Premium' },
+    { id: 3, nickname: 'Player3', email: 'player3@rockstar.com', password: 'pass123', role: 'Тестер', subscription: 'Бесплатно' },
+    { id: 4, nickname: 'YouTuber1', email: 'youtuber@rockstar.com', password: 'pass123', role: 'Ютубер', subscription: 'Навсегда' }
   ]);
 
   const [showAddFeature, setShowAddFeature] = useState(false);
@@ -63,6 +63,15 @@ const [userData, setUserData] = useState({
   const [newFeature, setNewFeature] = useState({ title: '', description: '', premium: false });
   const [newPromo, setNewPromo] = useState({ code: '', discount: 0, maxUses: 0 });
   const [keyDuration, setKeyDuration] = useState<7 | 30 | 999999>(7);
+  const [activationKeyInput, setActivationKeyInput] = useState('');
+  const [activationError, setActivationError] = useState('');
+  const [activationSuccess, setActivationSuccess] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [registerNickname, setRegisterNickname] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
 
   const subscriptionPlans = [
     { id: 1, name: '7 дней', price: '199₽', duration: '7 дней', badge: 'Пробный' },
@@ -73,20 +82,69 @@ const [userData, setUserData] = useState({
 const visualPacks = features;
 
 const handleLogin = () => {
-    const isAdminLogin = userData.uid === 1;
+    setLoginError('');
+    
+    if (authMode === 'register') {
+      if (!registerNickname || !registerEmail || !registerPassword) {
+        setLoginError('Заполните все поля');
+        return;
+      }
+      const newUser = {
+        id: users.length + 1,
+        nickname: registerNickname,
+        email: registerEmail,
+        password: registerPassword,
+        role: 'Пользователь',
+        subscription: 'Нет подписки'
+      };
+      setUsers([...users, newUser]);
+      setUserData({
+        uid: newUser.id,
+        nickname: newUser.nickname,
+        email: newUser.email,
+        hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
+        subscription: 'Нет подписки',
+        subscriptionEnd: null,
+        isAdmin: false,
+        role: 'Пользователь'
+      });
+      setIsLoggedIn(true);
+      setShowAuthModal(false);
+      setActiveTab('profile');
+      setRegisterNickname('');
+      setRegisterEmail('');
+      setRegisterPassword('');
+      return;
+    }
+    
+    const user = users.find(u => u.email === loginEmail);
+    
+    if (!user) {
+      setLoginError('Нет такого аккаунта! Зарегистрируйтесь.');
+      return;
+    }
+    
+    if (user.password !== loginPassword) {
+      setLoginError('Неверный пароль!');
+      return;
+    }
+    
+    const isAdmin = user.id === 1;
     setUserData({
-      uid: userData.uid,
-      nickname: isAdminLogin ? 'wezxe' : 'Player' + userData.uid,
-      email: isAdminLogin ? 'wezxe@rockstar.com' : `player${userData.uid}@rockstar.com`,
+      uid: user.id,
+      nickname: user.nickname,
+      email: user.email,
       hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
-      subscription: isAdminLogin ? 'Навсегда' : 'Нет подписки',
-      subscriptionEnd: isAdminLogin ? '2099-12-31' : null,
-      isAdmin: isAdminLogin,
-      role: isAdminLogin ? 'Администратор' : 'Пользователь'
+      subscription: user.subscription,
+      subscriptionEnd: isAdmin ? '2099-12-31' : null,
+      isAdmin: isAdmin,
+      role: user.role
     });
     setIsLoggedIn(true);
     setShowAuthModal(false);
     setActiveTab('profile');
+    setLoginEmail('');
+    setLoginPassword('');
   };
 
   const generateKey = (duration: 7 | 30 | 999999) => {
@@ -142,6 +200,44 @@ const handleLogin = () => {
     setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
     setShowEditRole(false);
     setSelectedUser(null);
+  };
+
+  const activateKey = () => {
+    setActivationError('');
+    setActivationSuccess('');
+    
+    if (!activationKeyInput.trim()) {
+      setActivationError('Введите ключ активации');
+      return;
+    }
+    
+    const keyIndex = activationKeys.findIndex(k => k.key === activationKeyInput.trim() && !k.used);
+    
+    if (keyIndex === -1) {
+      setActivationError('Ключ недействителен или уже использован');
+      return;
+    }
+    
+    const key = activationKeys[keyIndex];
+    const updatedKeys = [...activationKeys];
+    updatedKeys[keyIndex] = { ...key, used: true };
+    setActivationKeys(updatedKeys);
+    
+    const newEndDate = new Date();
+    if (key.duration === 999999) {
+      newEndDate.setFullYear(2099);
+    } else {
+      newEndDate.setDate(newEndDate.getDate() + key.duration);
+    }
+    
+    setUserData({
+      ...userData,
+      subscription: key.plan,
+      subscriptionEnd: newEndDate.toISOString().split('T')[0]
+    });
+    
+    setActivationSuccess(`Подписка "${key.plan}" успешно активирована!`);
+    setActivationKeyInput('');
   };
 
 const handleLogout = () => {
@@ -505,6 +601,42 @@ const handleLogout = () => {
                 </div>
               </Card>
             </div>
+
+            <Card className="p-6 border-cyan-500/30 bg-gradient-to-br from-gray-900 to-black">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <Icon name="Key" size={20} className="text-cyan-400" />
+                  <h3 className="text-lg font-bold text-white">Активировать ключ</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex gap-3">
+                    <Input
+                      value={activationKeyInput}
+                      onChange={(e) => setActivationKeyInput(e.target.value.toUpperCase())}
+                      placeholder="RST-7D-XXXXX или RST-30D-XXXXX"
+                      className="bg-gray-800/50 border-cyan-500/30 text-white placeholder:text-gray-500"
+                    />
+                    <Button
+                      onClick={activateKey}
+                      className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+                    >
+                      <Icon name="Check" size={18} className="mr-2" />
+                      Активировать
+                    </Button>
+                  </div>
+                  {activationError && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                      <p className="text-red-400 text-sm">{activationError}</p>
+                    </div>
+                  )}
+                  {activationSuccess && (
+                    <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <p className="text-green-400 text-sm">{activationSuccess}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
 
             <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
               <div className="flex items-center justify-between">
@@ -1094,7 +1226,9 @@ const handleLogout = () => {
                 <div className="space-y-2">
                   <Label htmlFor="nickname" className="text-gray-300">Никнейм</Label>
                   <Input 
-                    id="nickname" 
+                    id="nickname"
+                    value={registerNickname}
+                    onChange={(e) => setRegisterNickname(e.target.value)}
                     placeholder="Введи свой никнейм"
                     className="bg-gray-800/50 border-green-500/30 text-white placeholder:text-gray-500"
                   />
@@ -1105,7 +1239,9 @@ const handleLogout = () => {
                 <Label htmlFor="email" className="text-gray-300">Email</Label>
                 <Input 
                   id="email" 
-                  type="email" 
+                  type="email"
+                  value={authMode === 'login' ? loginEmail : registerEmail}
+                  onChange={(e) => authMode === 'login' ? setLoginEmail(e.target.value) : setRegisterEmail(e.target.value)}
                   placeholder="твой@email.com"
                   className="bg-gray-800/50 border-green-500/30 text-white placeholder:text-gray-500"
                 />
@@ -1115,11 +1251,19 @@ const handleLogout = () => {
                 <Label htmlFor="password" className="text-gray-300">Пароль</Label>
                 <Input 
                   id="password" 
-                  type="password" 
+                  type="password"
+                  value={authMode === 'login' ? loginPassword : registerPassword}
+                  onChange={(e) => authMode === 'login' ? setLoginPassword(e.target.value) : setRegisterPassword(e.target.value)}
                   placeholder="••••••••"
                   className="bg-gray-800/50 border-green-500/30 text-white placeholder:text-gray-500"
                 />
               </div>
+
+              {loginError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-red-400 text-sm">{loginError}</p>
+                </div>
+              )}
 
               <Button 
                 onClick={handleLogin}
