@@ -63,6 +63,7 @@ const [userData, setUserData] = useState({
   const [newFeature, setNewFeature] = useState({ title: '', description: '', premium: false });
   const [newPromo, setNewPromo] = useState({ code: '', discount: 0, maxUses: 0 });
   const [keyDuration, setKeyDuration] = useState<7 | 30 | 999999>(7);
+  const [keyCount, setKeyCount] = useState<number>(1);
   const [activationKeyInput, setActivationKeyInput] = useState('');
   const [activationError, setActivationError] = useState('');
   const [activationSuccess, setActivationSuccess] = useState('');
@@ -192,6 +193,46 @@ const handleLogin = () => {
     return newKey.key;
   };
 
+  const generateMultipleKeys = () => {
+    const count = Math.min(Math.max(1, keyCount), 100);
+    const keys: string[] = [];
+    const newKeys = [];
+    
+    for (let i = 0; i < count; i++) {
+      const planNames = { 7: '7 дней', 30: '30 дней', 999999: 'Навсегда' };
+      const prefix = keyDuration === 7 ? '7D' : keyDuration === 30 ? '30D' : 'LIFE';
+      const randomPart = Math.random().toString(36).substr(2, 10).toUpperCase();
+      const keyString = `RST-${prefix}-${randomPart}`;
+      
+      keys.push(keyString);
+      newKeys.push({
+        id: activationKeys.length + i + 1,
+        key: keyString,
+        duration: keyDuration,
+        plan: planNames[keyDuration],
+        used: false,
+        createdAt: new Date().toISOString().split('T')[0]
+      });
+    }
+    
+    setActivationKeys([...activationKeys, ...newKeys]);
+    
+    if (count > 1) {
+      const blob = new Blob([keys.join('\n')], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `rockstar-keys-${keyDuration}-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    setShowGenerateKey(false);
+    setKeyCount(1);
+  };
+
   const deleteFeature = (id: number) => {
     setFeatures(features.filter(f => f.id !== id));
   };
@@ -226,7 +267,13 @@ const handleLogin = () => {
   };
 
   const updateUserRole = (userId: number, newRole: string) => {
-    setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    const updatedUsers = users.map(u => u.id === userId ? { ...u, role: newRole } : u);
+    setUsers(updatedUsers);
+    
+    if (userData.uid === userId) {
+      setUserData({ ...userData, role: newRole });
+    }
+    
     setShowEditRole(false);
     setSelectedUser(null);
   };
@@ -1090,16 +1137,30 @@ const handleLogout = () => {
                   ))}
                 </div>
               </div>
+              <div>
+                <Label className="text-white mb-2">Количество ключей (1-100)</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={keyCount}
+                  onChange={(e) => setKeyCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))}
+                  className="bg-gray-800/50 border-green-500/30 text-white mt-2"
+                  placeholder="Введите количество"
+                />
+                {keyCount > 1 && (
+                  <p className="text-xs text-cyan-400 mt-2">
+                    <Icon name="Download" size={12} className="inline mr-1" />
+                    Будет скачан .txt файл с {keyCount} ключами
+                  </p>
+                )}
+              </div>
               <Button
-                onClick={() => {
-                  const key = generateKey(keyDuration);
-                  navigator.clipboard.writeText(key);
-                  setShowGenerateKey(false);
-                }}
+                onClick={generateMultipleKeys}
                 className="w-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
               >
                 <Icon name="Key" size={18} className="mr-2" />
-                Сгенерировать ключ
+                Сгенерировать {keyCount > 1 ? `${keyCount} ключей` : 'ключ'}
               </Button>
             </div>
           </Card>
