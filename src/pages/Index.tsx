@@ -117,7 +117,7 @@ const handleLogin = () => {
       return;
     }
     
-    const user = users.find(u => u.email === loginEmail);
+    const user = users.find(u => u.email === loginEmail || u.nickname === loginEmail);
     
     if (!user) {
       setLoginError('Нет такого аккаунта! Зарегистрируйтесь.');
@@ -211,7 +211,7 @@ const handleLogin = () => {
       return;
     }
     
-    const keyIndex = activationKeys.findIndex(k => k.key === activationKeyInput.trim() && !k.used);
+    const keyIndex = activationKeys.findIndex(k => k.key.toUpperCase() === activationKeyInput.trim().toUpperCase() && !k.used);
     
     if (keyIndex === -1) {
       setActivationError('Ключ недействителен или уже использован');
@@ -230,11 +230,19 @@ const handleLogin = () => {
       newEndDate.setDate(newEndDate.getDate() + key.duration);
     }
     
-    setUserData({
+    const newUserData = {
       ...userData,
       subscription: key.plan,
       subscriptionEnd: newEndDate.toISOString().split('T')[0]
-    });
+    };
+    
+    setUserData(newUserData);
+    
+    setUsers(users.map(u => 
+      u.id === userData.uid 
+        ? { ...u, subscription: key.plan }
+        : u
+    ));
     
     setActivationSuccess(`Подписка "${key.plan}" успешно активирована!`);
     setActivationKeyInput('');
@@ -1236,13 +1244,15 @@ const handleLogout = () => {
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-300">Email</Label>
+                <Label htmlFor="email" className="text-gray-300">
+                  {authMode === 'login' ? 'Email или никнейм' : 'Email'}
+                </Label>
                 <Input 
                   id="email" 
-                  type="email"
+                  type={authMode === 'login' ? 'text' : 'email'}
                   value={authMode === 'login' ? loginEmail : registerEmail}
                   onChange={(e) => authMode === 'login' ? setLoginEmail(e.target.value) : setRegisterEmail(e.target.value)}
-                  placeholder="твой@email.com"
+                  placeholder={authMode === 'login' ? 'wezxe или email@rockstar.com' : 'твой@email.com'}
                   className="bg-gray-800/50 border-green-500/30 text-white placeholder:text-gray-500"
                 />
               </div>
