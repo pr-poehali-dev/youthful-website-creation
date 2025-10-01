@@ -3,11 +3,24 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [isAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [userData, setUserData] = useState({
+    uid: 'RST-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+    nickname: 'Player',
+    email: 'player@rockstar.com',
+    hwid: 'HWID-' + Math.random().toString(36).substr(2, 12).toUpperCase(),
+    subscription: 'Навсегда',
+    subscriptionEnd: '2025-12-31'
+  });
 
   const subscriptionPlans = [
     { id: 1, name: '7 дней', price: '199₽', duration: '7 дней', badge: 'Пробный' },
@@ -18,171 +31,214 @@ const Index = () => {
   const visualPacks = [
     {
       id: 1,
-      title: 'Neon Dreams',
-      description: 'Яркие неоновые текстуры для Minecraft',
-      image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop',
+      title: 'Rockstar Premium',
+      description: 'Полный набор функций для доминирования',
+      image: 'https://images.unsplash.com/photo-1614854262318-831574f15f1f?w=400&h=300&fit=crop',
       premium: true
     },
     {
       id: 2,
-      title: 'Cyberpunk City',
-      description: 'Футуристичный визуал в стиле киберпанк',
+      title: 'Rockstar Combat',
+      description: 'Расширенные боевые возможности',
       image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop',
       premium: true
     },
     {
       id: 3,
-      title: 'Pixel Art Pro',
-      description: 'Классические пиксельные текстуры',
-      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop',
+      title: 'Rockstar ESP',
+      description: 'Визуализация игроков и предметов',
+      image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop',
       premium: false
     },
     {
       id: 4,
-      title: 'Retro Wave',
-      description: 'Ретро стиль 80-х для твоего мира',
-      image: 'https://images.unsplash.com/photo-1614854262318-831574f15f1f?w=400&h=300&fit=crop',
+      title: 'Rockstar Aimbot',
+      description: 'Точность на максимум',
+      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop',
       premium: true
     }
   ];
 
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    setShowAuthModal(false);
+    setActiveTab('profile');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setActiveTab('home');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-purple-100">
+    <div className="min-h-screen bg-black">
+      <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-lg border-b border-green-500/20">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <Icon name="Box" size={24} className="text-white" />
+<div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-green-500 rounded-xl flex items-center justify-center">
+                <Icon name="Zap" size={24} className="text-black" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                MC Visuals
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
+                ROCKSTAR CLIENT
               </h1>
             </div>
             
-            <nav className="hidden md:flex gap-8">
+<nav className="hidden md:flex gap-8">
               <button 
                 onClick={() => setActiveTab('home')}
-                className={`text-sm font-medium transition-colors ${activeTab === 'home' ? 'text-purple-600' : 'text-gray-600 hover:text-purple-600'}`}
+                className={`text-sm font-medium transition-colors ${activeTab === 'home' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`}
               >
                 Главная
               </button>
               <button 
-                onClick={() => setActiveTab('visuals')}
-                className={`text-sm font-medium transition-colors ${activeTab === 'visuals' ? 'text-purple-600' : 'text-gray-600 hover:text-purple-600'}`}
+                onClick={() => setActiveTab('features')}
+                className={`text-sm font-medium transition-colors ${activeTab === 'features' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`}
               >
-                Визуалы
+                Функции
               </button>
               <button 
                 onClick={() => setActiveTab('pricing')}
-                className={`text-sm font-medium transition-colors ${activeTab === 'pricing' ? 'text-purple-600' : 'text-gray-600 hover:text-purple-600'}`}
+                className={`text-sm font-medium transition-colors ${activeTab === 'pricing' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`}
               >
                 Цены
               </button>
+              {isLoggedIn && (
+                <button 
+                  onClick={() => setActiveTab('profile')}
+                  className={`text-sm font-medium transition-colors ${activeTab === 'profile' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`}
+                >
+                  Профиль
+                </button>
+              )}
               {isAdmin && (
                 <button 
                   onClick={() => setActiveTab('admin')}
-                  className={`text-sm font-medium transition-colors ${activeTab === 'admin' ? 'text-purple-600' : 'text-gray-600 hover:text-purple-600'}`}
+                  className={`text-sm font-medium transition-colors ${activeTab === 'admin' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`}
                 >
                   Админ
                 </button>
               )}
             </nav>
 
-            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-              Войти
-            </Button>
+            <div className="flex gap-3">
+              {!isLoggedIn ? (
+                <>
+                  <Button 
+                    onClick={() => { setAuthMode('login'); setShowAuthModal(true); }}
+                    variant="outline" 
+                    className="border-green-500/50 text-green-400 hover:bg-green-500/10"
+                  >
+                    Войти
+                  </Button>
+                  <Button 
+                    onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}
+                    className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+                  >
+                    Регистрация
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  onClick={handleLogout}
+                  variant="outline" 
+                  className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                >
+                  Выйти
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-12">
-        {activeTab === 'home' && (
+{activeTab === 'home' && (
           <div className="space-y-16 animate-fade-in">
             <section className="text-center space-y-6 py-12">
-              <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 mb-4">
-                🎮 Новая коллекция визуалов
+              <Badge className="bg-green-500/20 text-green-400 hover:bg-green-500/20 mb-4 border border-green-500/30">
+                ⚡ Непобедимый чит-клиент
               </Badge>
-              <h2 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent leading-tight">
-                Прокачай свой<br />Minecraft
+              <h2 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-cyan-400 via-green-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
+                ROCKSTAR<br />CLIENT
               </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Эксклюзивные визуалы и текстуры для создания уникального игрового опыта
+              <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                Полный контроль над игрой. Мощные функции для доминирования на любом сервере.
               </p>
               <div className="flex gap-4 justify-center pt-6">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                  onClick={() => setActiveTab('visuals')}
+                  className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+                  onClick={() => setActiveTab('features')}
                 >
                   <Icon name="Sparkles" size={20} className="mr-2" />
-                  Смотреть визуалы
+                  Смотреть функции
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => setActiveTab('pricing')}>
+                <Button size="lg" variant="outline" className="border-green-500/50 text-green-400 hover:bg-green-500/10" onClick={() => setActiveTab('pricing')}>
                   Узнать цены
                 </Button>
               </div>
             </section>
 
             <section className="grid md:grid-cols-3 gap-8">
-              <Card className="p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-purple-100">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                  <Icon name="Zap" size={24} className="text-purple-600" />
+              <Card className="p-6 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-1 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4 border border-green-500/30">
+                  <Icon name="Zap" size={24} className="text-green-400" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Мгновенный доступ</h3>
-                <p className="text-gray-600">Получи визуалы сразу после оплаты подписки</p>
+                <h3 className="text-xl font-bold mb-2 text-white">Мгновенный доступ</h3>
+                <p className="text-gray-400">Получи клиент сразу после оплаты подписки</p>
               </Card>
               
-              <Card className="p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-pink-100">
-                <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
-                  <Icon name="Crown" size={24} className="text-pink-600" />
+              <Card className="p-6 hover:shadow-xl hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-1 border-cyan-500/30 bg-gradient-to-br from-gray-900 to-black">
+                <div className="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4 border border-cyan-500/30">
+                  <Icon name="Shield" size={24} className="text-cyan-400" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Premium качество</h3>
-                <p className="text-gray-600">Все визуалы в HD качестве от топовых дизайнеров</p>
+                <h3 className="text-xl font-bold mb-2 text-white">Анти-бан защита</h3>
+                <p className="text-gray-400">Продвинутая система обхода античитов</p>
               </Card>
               
-              <Card className="p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-purple-100">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                  <Icon name="Rocket" size={24} className="text-purple-600" />
+              <Card className="p-6 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-1 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4 border border-green-500/30">
+                  <Icon name="Rocket" size={24} className="text-green-400" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Еженедельные обновления</h3>
-                <p className="text-gray-600">Новые визуалы каждую неделю бесплатно</p>
+                <h3 className="text-xl font-bold mb-2 text-white">Регулярные обновления</h3>
+                <p className="text-gray-400">Новые функции каждую неделю бесплатно</p>
               </Card>
             </section>
           </div>
         )}
 
-        {activeTab === 'visuals' && (
+{activeTab === 'features' && (
           <div className="space-y-8 animate-slide-up">
             <div className="text-center space-y-4">
-              <h2 className="text-4xl md:text-5xl font-bold">Коллекция визуалов</h2>
-              <p className="text-gray-600 text-lg">Выбирай визуалы для своего мира</p>
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Функции клиента</h2>
+              <p className="text-gray-400 text-lg">Все что нужно для победы</p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {visualPacks.map((pack, index) => (
                 <Card 
                   key={pack.id} 
-                  className="overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-purple-100 group"
+                  className="overflow-hidden hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-2 border-green-500/30 group bg-gradient-to-br from-gray-900 to-black"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="relative overflow-hidden">
                     <img 
                       src={pack.image} 
                       alt={pack.title}
-                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300 opacity-60"
                     />
                     {pack.premium && (
-                      <Badge className="absolute top-3 right-3 bg-gradient-to-r from-purple-600 to-pink-600">
+                      <Badge className="absolute top-3 right-3 bg-gradient-to-r from-cyan-500 to-green-500 text-black">
                         <Icon name="Lock" size={12} className="mr-1" />
                         Premium
                       </Badge>
                     )}
                   </div>
                   <div className="p-6 space-y-3">
-                    <h3 className="text-xl font-bold">{pack.title}</h3>
-                    <p className="text-gray-600">{pack.description}</p>
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                    <h3 className="text-xl font-bold text-white">{pack.title}</h3>
+                    <p className="text-gray-400">{pack.description}</p>
+                    <Button className="w-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold">
                       <Icon name="Download" size={18} className="mr-2" />
                       Скачать
                     </Button>
@@ -193,62 +249,62 @@ const Index = () => {
           </div>
         )}
 
-        {activeTab === 'pricing' && (
+{activeTab === 'pricing' && (
           <div className="space-y-12 animate-scale-in">
             <div className="text-center space-y-4">
-              <h2 className="text-4xl md:text-5xl font-bold">Выбери свой план</h2>
-              <p className="text-gray-600 text-lg">Доступ ко всем визуалам по подписке</p>
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Выбери свой план</h2>
+              <p className="text-gray-400 text-lg">Доступ ко всем функциям Rockstar Client</p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {subscriptionPlans.map((plan, index) => (
                 <Card 
                   key={plan.id}
-                  className={`p-8 relative overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
-                    index === 1 ? 'border-2 border-purple-500 shadow-xl' : 'border-purple-100'
+                  className={`p-8 relative overflow-hidden transition-all duration-300 hover:scale-105 ${
+                    index === 1 ? 'border-2 border-green-500 shadow-xl shadow-green-500/20 bg-gradient-to-br from-gray-900 to-black' : 'border-green-500/30 bg-gradient-to-br from-gray-900 to-black hover:shadow-xl hover:shadow-green-500/10'
                   }`}
                 >
                   {index === 1 && (
-                    <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-4 py-1 rounded-bl-lg">
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-cyan-500 to-green-500 text-black text-xs font-bold px-4 py-1 rounded-bl-lg">
                       ЛУЧШИЙ ВЫБОР
                     </div>
                   )}
                   <div className="space-y-6 pt-4">
                     <div>
-                      <Badge className="mb-3 bg-purple-100 text-purple-700 hover:bg-purple-100">
+                      <Badge className="mb-3 bg-green-500/20 text-green-400 hover:bg-green-500/20 border border-green-500/30">
                         {plan.badge}
                       </Badge>
-                      <h3 className="text-2xl font-bold">{plan.name}</h3>
+                      <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
                     </div>
                     <div className="space-y-2">
-                      <div className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      <div className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
                         {plan.price}
                       </div>
-                      <p className="text-gray-600">{plan.duration} доступа</p>
+                      <p className="text-gray-400">{plan.duration} доступа</p>
                     </div>
                     <ul className="space-y-3">
                       <li className="flex items-center gap-2">
-                        <Icon name="Check" size={20} className="text-green-500" />
-                        <span className="text-sm">Все визуалы</span>
+                        <Icon name="Check" size={20} className="text-green-400" />
+                        <span className="text-sm text-gray-300">Все функции</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <Icon name="Check" size={20} className="text-green-500" />
-                        <span className="text-sm">HD качество</span>
+                        <Icon name="Check" size={20} className="text-green-400" />
+                        <span className="text-sm text-gray-300">Анти-бан защита</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <Icon name="Check" size={20} className="text-green-500" />
-                        <span className="text-sm">Новые релизы</span>
+                        <Icon name="Check" size={20} className="text-green-400" />
+                        <span className="text-sm text-gray-300">Новые обновления</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <Icon name="Check" size={20} className="text-green-500" />
-                        <span className="text-sm">Поддержка 24/7</span>
+                        <Icon name="Check" size={20} className="text-green-400" />
+                        <span className="text-sm text-gray-300">Поддержка 24/7</span>
                       </li>
                     </ul>
                     <Button 
                       className={`w-full ${
                         index === 1 
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' 
-                          : 'bg-purple-600 hover:bg-purple-700'
+                          ? 'bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold' 
+                          : 'bg-green-600 hover:bg-green-700 text-white'
                       }`}
                     >
                       Оформить подписку
@@ -259,48 +315,133 @@ const Index = () => {
             </div>
           </div>
         )}
+        
+        {activeTab === 'profile' && isLoggedIn && (
+          <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-green-500 rounded-xl flex items-center justify-center">
+                <Icon name="User" size={24} className="text-black" />
+              </div>
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Личный кабинет</h2>
+            </div>
 
-        {activeTab === 'admin' && (
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Icon name="CreditCard" size={20} className="text-green-400" />
+                    <h3 className="text-lg font-bold text-white">Подписка</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <span className="text-gray-400">Статус</span>
+                      <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">
+                        {userData.subscription}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
+                      <span className="text-gray-400">Истекает</span>
+                      <span className="text-white font-mono">{userData.subscriptionEnd}</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 border-cyan-500/30 bg-gradient-to-br from-gray-900 to-black">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Icon name="User" size={20} className="text-cyan-400" />
+                    <h3 className="text-lg font-bold text-white">Профиль</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
+                      <span className="text-gray-400">Никнейм</span>
+                      <span className="text-white font-mono">{userData.nickname}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
+                      <span className="text-gray-400">Почта</span>
+                      <span className="text-white font-mono text-sm">{userData.email}</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black md:col-span-2">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Icon name="Shield" size={20} className="text-green-400" />
+                    <h3 className="text-lg font-bold text-white">Идентификаторы</h3>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
+                      <span className="text-gray-400">UID</span>
+                      <span className="text-green-400 font-mono font-bold">{userData.uid}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
+                      <span className="text-gray-400">HWID</span>
+                      <span className="text-cyan-400 font-mono font-bold text-sm">{userData.hwid}</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-2">Скачать клиент</h3>
+                  <p className="text-gray-400 text-sm">Последняя версия Rockstar Client v2.5.1</p>
+                </div>
+                <Button className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold">
+                  <Icon name="Download" size={18} className="mr-2" />
+                  Скачать
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
+
+{activeTab === 'admin' && (
           <div className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-                <Icon name="Shield" size={24} className="text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-green-500 rounded-xl flex items-center justify-center">
+                <Icon name="Shield" size={24} className="text-black" />
               </div>
-              <h2 className="text-4xl font-bold">Админ-панель</h2>
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Админ-панель</h2>
             </div>
 
             <Tabs defaultValue="users" className="space-y-6">
-              <TabsList className="bg-purple-50">
-                <TabsTrigger value="users">Пользователи</TabsTrigger>
-                <TabsTrigger value="subscriptions">Подписки</TabsTrigger>
-                <TabsTrigger value="visuals">Визуалы</TabsTrigger>
+              <TabsList className="bg-gray-900 border border-green-500/30">
+                <TabsTrigger value="users" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Пользователи</TabsTrigger>
+                <TabsTrigger value="subscriptions" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Подписки</TabsTrigger>
+                <TabsTrigger value="visuals" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Функции</TabsTrigger>
               </TabsList>
 
               <TabsContent value="users" className="space-y-4">
-                <Card className="p-6">
-                  <h3 className="text-xl font-bold mb-4">Управление пользователями</h3>
+                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
+                  <h3 className="text-xl font-bold text-white mb-4">Управление пользователями</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-green-500/10 rounded-lg border border-green-500/20">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
-                          <Icon name="User" size={20} className="text-purple-700" />
+                        <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30">
+                          <Icon name="User" size={20} className="text-green-400" />
                         </div>
                         <div>
-                          <p className="font-semibold">admin@minecraft-visuals.com</p>
-                          <p className="text-sm text-gray-600">Администратор</p>
+                          <p className="font-semibold text-white">admin@rockstar.com</p>
+                          <p className="text-sm text-gray-400">Администратор</p>
                         </div>
                       </div>
-                      <Badge className="bg-purple-600">Admin</Badge>
+                      <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">Admin</Badge>
                     </div>
                   </div>
                 </Card>
               </TabsContent>
 
               <TabsContent value="subscriptions" className="space-y-4">
-                <Card className="p-6">
+                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold">Выдача подписок</h3>
-                    <Button className="bg-gradient-to-r from-purple-600 to-pink-600">
+                    <h3 className="text-xl font-bold text-white">Выдача подписок</h3>
+                    <Button className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold">
                       <Icon name="Plus" size={18} className="mr-2" />
                       Новая подписка
                     </Button>
@@ -308,13 +449,13 @@ const Index = () => {
                   
                   <div className="grid md:grid-cols-3 gap-4">
                     {subscriptionPlans.map(plan => (
-                      <Card key={plan.id} className="p-4 border-purple-100">
+                      <Card key={plan.id} className="p-4 border-green-500/30 bg-gray-800/50">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-bold">{plan.name}</h4>
-                            <Badge variant="outline">{plan.price}</Badge>
+                            <h4 className="font-bold text-white">{plan.name}</h4>
+                            <Badge variant="outline" className="border-green-500/30 text-green-400">{plan.price}</Badge>
                           </div>
-                          <Button variant="outline" size="sm" className="w-full">
+                          <Button variant="outline" size="sm" className="w-full border-green-500/50 text-green-400 hover:bg-green-500/10">
                             Выдать
                           </Button>
                         </div>
@@ -325,30 +466,30 @@ const Index = () => {
               </TabsContent>
 
               <TabsContent value="visuals" className="space-y-4">
-                <Card className="p-6">
+                <Card className="p-6 border-green-500/30 bg-gradient-to-br from-gray-900 to-black">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold">Управление визуалами</h3>
-                    <Button className="bg-gradient-to-r from-purple-600 to-pink-600">
+                    <h3 className="text-xl font-bold text-white">Управление функциями</h3>
+                    <Button className="bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold">
                       <Icon name="Upload" size={18} className="mr-2" />
-                      Загрузить визуал
+                      Добавить функцию
                     </Button>
                   </div>
                   
                   <div className="space-y-3">
                     {visualPacks.map(pack => (
-                      <div key={pack.id} className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+                      <div key={pack.id} className="flex items-center justify-between p-4 bg-green-500/10 rounded-lg border border-green-500/20">
                         <div className="flex items-center gap-4">
-                          <img src={pack.image} alt={pack.title} className="w-16 h-16 rounded-lg object-cover" />
+                          <img src={pack.image} alt={pack.title} className="w-16 h-16 rounded-lg object-cover opacity-60" />
                           <div>
-                            <p className="font-semibold">{pack.title}</p>
-                            <p className="text-sm text-gray-600">{pack.description}</p>
+                            <p className="font-semibold text-white">{pack.title}</p>
+                            <p className="text-sm text-gray-400">{pack.description}</p>
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="border-green-500/50 text-green-400 hover:bg-green-500/10">
                             <Icon name="Edit" size={16} />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">
                             <Icon name="Trash2" size={16} />
                           </Button>
                         </div>
@@ -362,52 +503,136 @@ const Index = () => {
         )}
       </main>
 
-      <footer className="bg-gradient-to-br from-purple-900 to-pink-900 text-white mt-20">
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+          <Card className="w-full max-w-md mx-4 p-8 border-green-500/30 bg-gradient-to-br from-gray-900 to-black animate-scale-in">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
+                {authMode === 'login' ? 'Вход' : 'Регистрация'}
+              </h2>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowAuthModal(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <Icon name="X" size={20} />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {authMode === 'register' && (
+                <div className="space-y-2">
+                  <Label htmlFor="nickname" className="text-gray-300">Никнейм</Label>
+                  <Input 
+                    id="nickname" 
+                    placeholder="Введи свой никнейм"
+                    className="bg-gray-800/50 border-green-500/30 text-white placeholder:text-gray-500"
+                  />
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-300">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="твой@email.com"
+                  className="bg-gray-800/50 border-green-500/30 text-white placeholder:text-gray-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-gray-300">Пароль</Label>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••"
+                  className="bg-gray-800/50 border-green-500/30 text-white placeholder:text-gray-500"
+                />
+              </div>
+
+              <Button 
+                onClick={handleLogin}
+                className="w-full bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-black font-bold"
+              >
+                {authMode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+              </Button>
+
+              <div className="text-center text-sm text-gray-400">
+                {authMode === 'login' ? (
+                  <p>
+                    Нет аккаунта?{' '}
+                    <button 
+                      onClick={() => setAuthMode('register')}
+                      className="text-green-400 hover:text-green-300 font-semibold"
+                    >
+                      Зарегистрируйся
+                    </button>
+                  </p>
+                ) : (
+                  <p>
+                    Уже есть аккаунт?{' '}
+                    <button 
+                      onClick={() => setAuthMode('login')}
+                      className="text-green-400 hover:text-green-300 font-semibold"
+                    >
+                      Войди
+                    </button>
+                  </p>
+                )}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      <footer className="bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white mt-20 border-t border-green-500/20">
         <div className="container mx-auto px-6 py-12">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                  <Icon name="Box" size={24} className="text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-green-500 rounded-xl flex items-center justify-center">
+                  <Icon name="Zap" size={24} className="text-black" />
                 </div>
-                <h3 className="text-xl font-bold">MC Visuals</h3>
+                <h3 className="text-xl font-bold">ROCKSTAR</h3>
               </div>
-              <p className="text-purple-200">Лучшие визуалы для Minecraft</p>
+              <p className="text-gray-400">Самый мощный чит-клиент</p>
             </div>
             
             <div className="space-y-3">
-              <h4 className="font-bold">Продукт</h4>
-              <ul className="space-y-2 text-purple-200">
-                <li><a href="#" className="hover:text-white transition-colors">Визуалы</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Цены</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
+              <h4 className="font-bold text-white">Продукт</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><button onClick={() => setActiveTab('features')} className="hover:text-green-400 transition-colors">Функции</button></li>
+                <li><button onClick={() => setActiveTab('pricing')} className="hover:text-green-400 transition-colors">Цены</button></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">FAQ</a></li>
               </ul>
             </div>
             
             <div className="space-y-3">
-              <h4 className="font-bold">Поддержка</h4>
-              <ul className="space-y-2 text-purple-200">
-                <li><a href="#" className="hover:text-white transition-colors">Помощь</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Контакты</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Discord</a></li>
+              <h4 className="font-bold text-white">Поддержка</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-green-400 transition-colors">Помощь</a></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">Контакты</a></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">Discord</a></li>
               </ul>
             </div>
             
             <div className="space-y-3">
-              <h4 className="font-bold">Социальные сети</h4>
+              <h4 className="font-bold text-white">Социальные сети</h4>
               <div className="flex gap-3">
-                <a href="#" className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors">
-                  <Icon name="MessageCircle" size={20} />
+                <a href="#" className="w-10 h-10 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center hover:bg-green-500/30 transition-colors">
+                  <Icon name="MessageCircle" size={20} className="text-green-400" />
                 </a>
-                <a href="#" className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors">
-                  <Icon name="Youtube" size={20} />
+                <a href="#" className="w-10 h-10 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center hover:bg-green-500/30 transition-colors">
+                  <Icon name="Youtube" size={20} className="text-green-400" />
                 </a>
               </div>
             </div>
           </div>
           
-          <div className="border-t border-white/20 mt-8 pt-8 text-center text-purple-200">
-            <p>© 2024 MC Visuals. Все права защищены.</p>
+          <div className="border-t border-green-500/20 mt-8 pt-8 text-center text-gray-400">
+            <p>© 2024 ROCKSTAR CLIENT. Все права защищены.</p>
           </div>
         </div>
       </footer>
